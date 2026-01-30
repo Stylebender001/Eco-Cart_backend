@@ -1,6 +1,6 @@
 import bcrpyt from 'bcrypt';
 import express from 'express';
-import Users from '../models/ user.js';
+import Users from '../models/user.js';
 const router = express.Router();
 
 router.post('/', async (req, res) => {
@@ -16,3 +16,5 @@ router.post('/', async (req, res) => {
     token: token,
   });
 });
+
+export default router;

@@ -1,9 +1,9 @@
-import express from "express";
-import Product from "../models/productModel.js";
+import express from 'express';
+import Product from '../models/product.js';
 
 const router = express.Router();
 
-router.get("/", async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const {
       category,
@@ -13,7 +13,7 @@ router.get("/", async (req, res) => {
       search,
       page = 1,
       limit = 12,
-      sort = "grade",
+      sort = 'grade',
     } = req.query;
 
     let query = {};
@@ -30,15 +30,15 @@ router.get("/", async (req, res) => {
     }
 
     // Search
-    const escapeRegex = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const escapeRegex = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
     if (search) {
       const safeSearch = escapeRegex(search);
 
       query.$or = [
-        { name: { $regex: safeSearch, $options: "i" } },
-        { brand: { $regex: safeSearch, $options: "i" } },
-        { description: { $regex: safeSearch, $options: "i" } },
+        { name: { $regex: safeSearch, $options: 'i' } },
+        { brand: { $regex: safeSearch, $options: 'i' } },
+        { description: { $regex: safeSearch, $options: 'i' } },
       ];
     }
 
@@ -47,16 +47,16 @@ router.get("/", async (req, res) => {
     // Sort logic
     let sortOrder = {};
     switch (sort) {
-      case "price_asc":
+      case 'price_asc':
         sortOrder = { price: 1 };
         break;
-      case "price_desc":
+      case 'price_desc':
         sortOrder = { price: -1 };
         break;
-      case "carbon_asc":
+      case 'carbon_asc':
         sortOrder = { carbonFootprint: 1 };
         break;
-      case "newest":
+      case 'newest':
         sortOrder = { createdAt: -1 };
         break;
       default: // grade (A+ first)
@@ -68,7 +68,7 @@ router.get("/", async (req, res) => {
       .skip(skip)
       .limit(Number(limit))
       .sort(sortOrder)
-      .select("-__v");
+      .select('-__v');
 
     const total = await Product.countDocuments(query);
 
@@ -84,7 +84,7 @@ router.get("/", async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "Server error",
+      message: 'Server error',
       error: error.message,
     });
   }

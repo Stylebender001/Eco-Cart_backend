@@ -1,8 +1,8 @@
-import jwt from 'jwtwebtoken';
+import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
-  name: {
+  username: {
     type: String,
     required: true,
   },
@@ -16,11 +16,17 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  role: {
+    type: String,
+    enum: ['customer', 'admin'],
+    required: true,
+  },
 });
 
 userSchema.methods.generateAuthToken = function () {
   const token = jwt.sign(
     { _id: this._id, name: this.name, email: this.email },
+    // eslint-disable-next-line no-undef
     process.env.JWT_SECRET,
     { expiresIn: '1h' }
   );
