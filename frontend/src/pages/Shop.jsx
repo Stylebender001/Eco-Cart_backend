@@ -11,6 +11,11 @@ function Shop() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
+  // Add pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  
   // Multiple filters state
   const [filters, setFilters] = useState({
     category: 'All Categories',
@@ -18,13 +23,16 @@ function Shop() {
     sortBy: 'featured'
   });
 
-  // Fetch products from backend
+  // Fetch products from backend - UPDATED with pagination
   const fetchProducts = async () => {
     try {
       setLoading(true);
       setError('');
       
       const params = {};
+      
+      // Add page parameter
+      params.page = currentPage;
       
       // Category filter
       if (filters.category !== 'All Categories') {
@@ -46,6 +54,8 @@ function Shop() {
       
       if (response.data.success) {
         setProducts(response.data.products || response.data.data || []);
+        setTotalProducts(response.data.total || 0);
+        setTotalPages(response.data.totalPages || 1);
       } else {
         setError('Failed to load products');
       }
@@ -72,10 +82,11 @@ function Shop() {
   useEffect(() => {
     fetchProducts();
     fetchCategories();
-  }, [filters]); // Re-fetch when filters change
+  }, [filters, currentPage]); // Add currentPage to dependencies
 
-  // Update filter function
+  // Update filter function - reset to page 1 when filters change
   const updateFilter = (filterName, value) => {
+    setCurrentPage(1); // Reset to first page when filter changes
     setFilters(prev => ({
       ...prev,
       [filterName]: value
@@ -103,6 +114,35 @@ function Shop() {
     stock: product.stock,
     description: product.description
   }));
+
+  // Simple pagination controls
+  const Pagination = () => {
+    if (totalPages <= 1) return null;
+    
+    return (
+      <div className="flex justify-center items-center gap-4 mt-8">
+        <button
+          onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+          disabled={currentPage === 1}
+          className="px-4 py-2 bg-white border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+        >
+          Previous
+        </button>
+        
+        <span className="text-gray-700">
+          Page {currentPage} of {totalPages}
+        </span>
+        
+        <button
+          onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+          disabled={currentPage === totalPages}
+          className="px-4 py-2 bg-white border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+        >
+          Next
+        </button>
+      </div>
+    );
+  };
 
   return (
     <div className="bg-orange-50/50 min-h-screen">
@@ -158,7 +198,7 @@ function Shop() {
             <div className="lg:w-3/4">
               <div className="flex flex-col md:flex-row justify-between items-center mb-6">
                 <div className="text-gray-600 mb-4 md:mb-0">
-                  {formattedProducts.length} {formattedProducts.length === 1 ? 'product' : 'products'} found
+                  Showing {products.length} of {totalProducts} products
                   {(filters.category !== 'All Categories' || filters.ecoScore) && (
                     <span className="ml-2 text-sm text-green-600">
                       (filtered)
@@ -183,8 +223,12 @@ function Shop() {
                   <p className="text-gray-600">No products found with current filters.</p>
                   <button
                     onClick={() => {
-                      updateFilter('category', 'All Categories');
-                      updateFilter('ecoScore', '');
+                      setCurrentPage(1);
+                      setFilters({
+                        category: 'All Categories',
+                        ecoScore: '',
+                        sortBy: 'featured'
+                      });
                     }}
                     className="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
                   >
@@ -192,14 +236,20 @@ function Shop() {
                   </button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {formattedProducts.map((product) => (
-                    <ProductCard 
-                      product={product} 
-                      key={product.id} 
-                    />
-                  ))}
-                </div>
+                <>
+                  {/* Products Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                    {formattedProducts.map((product) => (
+                      <ProductCard 
+                        product={product} 
+                        key={product.id} 
+                      />
+                    ))}
+                  </div>
+
+                  {/* Simple Pagination */}
+                  <Pagination />
+                </>
               )}
             </div>
           </div>

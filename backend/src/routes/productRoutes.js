@@ -58,8 +58,6 @@ router.get("/", async (req, res) => {
         sortOption = { createdAt: -1 }; // Default: newest first
     }
 
-    console.log("Sorting by:", sort, "with option:", sortOption);
-
     // Get products
     const products = await Product.find(query)
       .skip(skip)
@@ -156,7 +154,48 @@ router.get("/:id", async (req, res) => {
     });
   }
 });
+// Add this route to your productRoutes.js file, right before export default router;
 
+// UPDATE stock after purchase (for checkout)
+router.put("/:id/stock", async (req, res) => {
+  try {
+    const { quantity } = req.body;
+    const product = await Product.findById(req.params.id);
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    // Check if enough stock
+    if (product.stock < quantity) {
+      return res.status(400).json({
+        success: false,
+        message: `Not enough stock available. Only ${product.stock} left.`,
+      });
+    }
+
+    // Update stock
+    product.stock = product.stock - quantity;
+    product.inStock = product.stock > 0;
+
+    await product.save();
+
+    res.json({
+      success: true,
+      data: product,
+      message: `Stock updated. Remaining: ${product.stock}`,
+    });
+  } catch (error) {
+    console.error("Error updating stock:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update stock",
+    });
+  }
+});
 // GET product categories (for filters)
 router.get("/categories/all", async (req, res) => {
   try {
