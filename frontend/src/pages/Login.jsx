@@ -53,7 +53,7 @@ function Login() {
   if (email === "admin@example.com") {
     const adminUser = {
       id: 1,
-      email: "admin@example.com",
+      email: "admin@ecocart.com",
       name: "Admin",
       role: "admin",
     };
@@ -165,7 +165,7 @@ function Login() {
           </div>
         </div>
 
-        {/* Right side - Moved closer (gap-8 instead of gap-16) */}
+        {/* Login form */}
         <div className="flex-1 max-w-md ml-8">
           {" "}
           {/* Added ml-8 to bring closer */}
