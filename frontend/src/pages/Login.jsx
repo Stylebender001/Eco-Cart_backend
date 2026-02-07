@@ -53,7 +53,7 @@ function Login() {
   if (email === "admin@example.com") {
     const adminUser = {
       id: 1,
-      email: "admin@example.com",
+      email: "admin@ecocart.com",
       name: "Admin",
       role: "admin",
     };
