@@ -119,10 +119,7 @@ function AdminDashboard() {
               Product Management
             </h1>
             <p className="text-gray-600 mt-2">
-              Welcome,{" "}
-              <span className="font-semibold">
-                {user?.name || user?.email || "Admin"}
-              </span>
+              Welcome, <span className="font-semibold">Admin</span>
             </p>
           </div>
           <button
